@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "460895298545",
+    "project_id": "smart-window-device",
+    "storage_bucket": "smart-window-device.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:460895298545:android:a77149a7920af958b55a50",
+        "android_client_info": {
+          "package_name": "com.hsj.SmartWindowdevice"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "460895298545-o7ejll0p9f6rs8osr0a86oqij4jf972l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCP81ooGLKoBiv43qRgwaV5B-YeHu4gWPs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "460895298545-o7ejll0p9f6rs8osr0a86oqij4jf972l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
