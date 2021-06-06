@@ -17,7 +17,8 @@ import serial
 import struct
 import time
 from datetime import datetime
-
+from time import sleep
+import socket
 
 class PMS7003(object):
 
@@ -145,25 +146,24 @@ class PMS7003(object):
 
     def save_data(self,buffer):
 
+        global dust_data
+
         chksum = self.chksum_cal(buffer)
         data = self.unpack_data(buffer)
 
         print ("PM 1.0 : %s" % ( data[self.DUST_PM1_0_ATM]))
         print ("PM 2.5 : %s" % ( data[self.DUST_PM2_5_ATM]))
         print ("PM 10.0 : %s" % ( data[self.DUST_PM10_0_ATM]))
-        f.write(date_string + "," + data[self.DUST_PM1_0_ATM] + "," + data[self.DUST_PM2_5_ATM] + "," + data[self.DUST_PM10_0_ATM]+'\n' )
 
-
-
-
-
-
+        dust_data = date_string + "," + str(data[self.DUST_PM1_0_ATM]) + "," + str(data[self.DUST_PM2_5_ATM]) + "," + str(data[self.DUST_PM10_0_ATM])+'\n'
+       # f.write(dust_data)
+        
 
 
 
 # UART / USB Serial : 'dmesg | grep ttyUSB'
 USB0 = '/dev/ttyUSB0'
-UART = '/dev/ttyAMA0'
+UART = '/dev/ttyS0'
 
 # USE PORT
 SERIAL_PORT = UART
@@ -171,6 +171,24 @@ SERIAL_PORT = UART
 # Baud Rate
 Speed = 9600
 
+# Host ip 
+HOST = ""
+
+#Port
+PORT = 9999
+
+dust_data = ""
+
+#server setup
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+server_socket.bind(("", PORT))
+
+server_socket.listen()
+
+is_connected = 0
 
 # example
 if __name__=='__main__':
@@ -179,12 +197,14 @@ if __name__=='__main__':
     ser = serial.Serial(SERIAL_PORT, Speed, timeout = 1)
 
     dust = PMS7003()
-    f = open('fine_dust.csv','w', encoding = "UTF-8")
+    #f = open('fine_dust.csv','w', encoding = "UTF-8")
 
     while True:
-        now_time = datetime.now()
-        date_string = now.year + "." + now.month + "." + now.day + " " + now.hour + ":" + now.minute + ":" + now.second
-        #ex: 2021.06.06 09:49:11
+        #check time
+        now = datetime.now()
+        date_string = str(now.year) + "." + str(now.month) + "." + str(now.day) + " " + str(now.hour) + ":" + str(now.minute) + ":" + str(now.second)
+        
+        #read serial input
         ser.flushInput()
         buffer = ser.read(1024)
 
@@ -192,13 +212,37 @@ if __name__=='__main__':
         
             print("DATA read success")
         
-            # print data
+            #print data
             #dust.print_serial(buffer)
             dust.save_data(buffer)
-            
         else:
 
-            print("DATA read fail...")
+            print("DATA read fail...")           
+        #check connection 
+        if (is_connected == 0):
+            try:
+                client_socket, addr = server_socket.accept()
+                print('Connected by', addr)
+                is_connected = 1
+            except:
+                pass
 
-    f.close() # close file
+
+        #send data
+        if (is_connected == 1):
+            try:
+                client_socket.sendall(dust_data.encode())
+            except:
+                is_connected = 0
+                #pass
+                #client_socket.close()
+                #server_socket.close()
+                
+
+
+        sleep(1)
+
+    #f.close() # close file
+    client_socket.close()
+    server_socket.close()
     ser.close()
