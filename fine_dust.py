@@ -1,3 +1,4 @@
+  
 """
 * PMS7003 데이터 수신 프로그램
 * 수정 : 2018. 11. 19
@@ -15,6 +16,7 @@ http://eleparts.co.kr/data/_gextends/good-pdf/201803/good-pdf-4208690-1.pdf
 import serial
 import struct
 import time
+from datetime import datetime
 
 
 class PMS7003(object):
@@ -141,6 +143,22 @@ class PMS7003(object):
         print ("CHKSUM : %s | read CHKSUM : %s | CHKSUM result : %s" % (chksum, data[self.CHECKSUM], chksum == data[self.CHECKSUM]))
         print ("============================================================================")
 
+    def save_data(self,buffer):
+
+        chksum = self.chksum_cal(buffer)
+        data = self.unpack_data(buffer)
+
+        print ("PM 1.0 : %s" % ( data[self.DUST_PM1_0_ATM]))
+        print ("PM 2.5 : %s" % ( data[self.DUST_PM2_5_ATM]))
+        print ("PM 10.0 : %s" % ( data[self.DUST_PM10_0_ATM]))
+        f.write(date_string + "," + data[self.DUST_PM1_0_ATM] + "," + data[self.DUST_PM2_5_ATM] + "," + data[self.DUST_PM10_0_ATM]+'\n' )
+
+
+
+
+
+
+
 
 
 # UART / USB Serial : 'dmesg | grep ttyUSB'
@@ -161,9 +179,12 @@ if __name__=='__main__':
     ser = serial.Serial(SERIAL_PORT, Speed, timeout = 1)
 
     dust = PMS7003()
+    f = open('fine_dust.csv','w', encoding = "UTF-8")
 
     while True:
-        
+        now_time = datetime.now()
+        date_string = now.year + "." + now.month + "." + now.day + " " + now.hour + ":" + now.minute + ":" + now.second
+        #ex: 2021.06.06 09:49:11
         ser.flushInput()
         buffer = ser.read(1024)
 
@@ -172,11 +193,12 @@ if __name__=='__main__':
             print("DATA read success")
         
             # print data
-            dust.print_serial(buffer)
+            #dust.print_serial(buffer)
+            dust.save_data(buffer)
             
         else:
 
             print("DATA read fail...")
 
-
+    f.close() # close file
     ser.close()
