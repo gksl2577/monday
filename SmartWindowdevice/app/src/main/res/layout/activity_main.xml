@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     android:orientation="vertical"
     android:padding="5dp">
 
@@ -25,10 +27,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            android:textSize="15sp"
-            android:textStyle="bold"
             android:gravity="center"
-            android:textColor="#070707" />
+            android:textColor="#070707"
+            android:textSize="15sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 
@@ -46,24 +48,17 @@
             android:contentDescription="@string/weather_image"
             android:src="@drawable/weather" />
 
-        <ImageView
-            android:id="@+id/weatherNow_image"
-            android:contentDescription="@string/weathernow_image"
-            android:layout_width="120dp"
-            android:layout_height="100dp"
-            android:layout_margin="10dp"
-            android:gravity="center"
-            android:textColor="#070707" />
 
         <TextView
             android:id="@+id/temperature"
-            android:layout_width="120dp"
+            android:layout_width="match_parent"
             android:layout_height="100dp"
             android:layout_margin="10dp"
-            android:textSize="20sp"
-            android:textStyle="bold"
             android:gravity="center"
-            android:textColor="#070707" />
+            android:textColor="#070707"
+            android:textSize="50sp"
+            android:textStyle="bold"
+            tools:text="44" />
     </LinearLayout>
 
     <LinearLayout
@@ -115,21 +110,170 @@
                 android:contentDescription="@string/dust_image"
                 android:src="@drawable/dust" />
 
-            <TextView
-                android:id="@+id/inside_dust"
+            <LinearLayout
                 android:layout_width="120dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:gravity="center"
-                android:textColor="#070707" />
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/outside_dust"
+                <LinearLayout
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/inside_dust1_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:text="미세먼지"
+                        android:textColor="#070707"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:id="@+id/inside_dust1_state"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:textColor="#070707"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="좋음" />
+
+                    <TextView
+                        android:id="@+id/inside_dust1_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:textColor="#070707"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="10㎍/㎥" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/inside_dust2_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:text="초미세먼지"
+                        android:textColor="#070707"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:id="@+id/inside_dust2_state"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:textColor="#070707"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="좋음" />
+
+                    <TextView
+                        android:id="@+id/inside_dust2_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:textColor="#070707"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="10㎍/㎥" />
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+
+            <LinearLayout
                 android:layout_width="120dp"
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
-                android:gravity="center"
-                android:textColor="#070707" />
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/outside_dust1_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:text="미세먼지"
+                        android:textColor="#070707"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:id="@+id/outside_dust1_state"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:textColor="#070707"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="좋음" />
+
+                    <TextView
+                        android:id="@+id/outside_dust1_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:textColor="#070707"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="10㎍/㎥" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/outside_dust2_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:text="초미세먼지"
+                        android:textColor="#070707"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:id="@+id/outside_dust2_state"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:textColor="#070707"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="좋음" />
+
+                    <TextView
+                        android:id="@+id/outside_dust2_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="33dp"
+                        android:gravity="center"
+                        android:textColor="#070707"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="10㎍/㎥" />
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+
         </LinearLayout>
 
         <LinearLayout
@@ -158,7 +302,10 @@
                 android:layout_height="100dp"
                 android:layout_margin="10dp"
                 android:gravity="center"
-                android:textColor="#070707" />
+                android:text="430ppm"
+                android:textColor="#070707"
+                android:textSize="25sp"
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 
@@ -219,6 +366,14 @@
             android:textStyle="bold" />
 
     </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/gray"
+        android:text="자료출처 : 환경부/한국환경공단\n 제공하는 자료는 “인증을 받지 않은 실시간자료”이므로 자료 오류 및 표출방식에 따라 값이 다를 수 있음"
+        android:textColor="@color/white"
+        android:textSize="10sp" />
 
 
 </LinearLayout>
