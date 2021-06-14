@@ -5,7 +5,7 @@
     <string name="window_image">window_image</string>
     <string name="edittext_hint">비밀번호를 입력하세요.</string>
     <string name="connectBtn">연결하기</string>
-    
+
     <string name="window_auto_mode">창문 자동 모드</string>
     <string name="window_manual_mode">창문 수동 모드</string>
     <string name="inside">Inside</string>

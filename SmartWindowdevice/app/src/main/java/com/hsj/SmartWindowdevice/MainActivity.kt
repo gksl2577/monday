@@ -27,6 +27,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,12 +44,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        initVariables()
 
+        initVariables()
+        Log.d("data","${(LoginActivity.context as LoginActivity).sensordata}" )
+        inside_co2.setText((LoginActivity.context as LoginActivity).sensordata)
         location_image.setOnClickListener {
             requestLocationPermission()
-
-
         }
 
         // 창문 수동 모드 버튼
@@ -66,12 +67,42 @@ class MainActivity : AppCompatActivity() {
             builder.setPositiveButton(
                 "ON"
             ) { _: DialogInterface?, _: Int ->
+
                 Log.d("pdlcSwitch", "on")
+                if (LoginActivity.Companion.pdlcFlag == false) {
+                    Thread {
+                        try {
+                            (LoginActivity.context as LoginActivity).tcp?.pdlcOn()
+                            LoginActivity.Companion.pdlcFlag = true
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                        }
+
+                    }.start()
+
+                }else{
+                    Toast.makeText(applicationContext,"pdlc가 켜져 있습니다.", Toast.LENGTH_SHORT).show()
+                }
+
             }
             builder.setNegativeButton(
                 "OFF"
             ) { _: DialogInterface?, _: Int ->
                 Log.d("pdlcSwitch", "off")
+                if (LoginActivity.Companion.pdlcFlag == true) {
+                    Thread {
+                        try {
+                            (LoginActivity.context as LoginActivity).tcp?.pdlcOff()
+                            LoginActivity.Companion.pdlcFlag = false
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                        }
+
+                    }.start()
+
+                }else{
+                    Toast.makeText(applicationContext,"pdlc가 꺼져 있습니다.", Toast.LENGTH_SHORT).show()
+                }
 
             }
             builder.show()
@@ -86,14 +117,54 @@ class MainActivity : AppCompatActivity() {
             builder2.setPositiveButton(
                 "ON"
             ) { _: DialogInterface?, _: Int ->
-                Toast.makeText(applicationContext, "창문 자동 모드를 사용합니다.", Toast.LENGTH_SHORT).show()
+                if (LoginActivity.Companion.windowAutoModeFlag == false) {
+                    Thread {
+                        try {
+                            (LoginActivity.context as LoginActivity).tcp?.windowAutoModeOn()
+                            LoginActivity.Companion.windowAutoModeFlag = true
+                            runOnUiThread {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "창문 자동 모드를 사용합니다.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                        }
+
+                    }.start()
+
+                }else{
+                    Toast.makeText(applicationContext,"창문 자동 모드가 켜져 있습니다.", Toast.LENGTH_SHORT).show()
+                }
+
                 Log.d("automode", "on")
             }
             builder2.setNegativeButton(
                 "OFF"
             ) { _: DialogInterface?, _: Int ->
-                Toast.makeText(applicationContext, "창문 자동 모드를 중지합니다.", Toast.LENGTH_SHORT).show()
+                if (LoginActivity.windowAutoModeFlag == true) {
+                    Thread {
+                        try {
+                            (LoginActivity.context as LoginActivity).tcp?.windowAutoModeOff()
+                            LoginActivity.Companion.windowAutoModeFlag = false
+                            runOnUiThread {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "창문 자동 모드를 종료합니다.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                        }
 
+                    }.start()
+
+                }else{
+                    Toast.makeText(applicationContext,"창문 자동 모드가 꺼져 있습니다.", Toast.LENGTH_SHORT).show()
+                }
                 Log.d("automode", "off")
 
             }
@@ -181,7 +252,6 @@ class MainActivity : AppCompatActivity() {
 
         (dustValue.pm25Grade ?: Grade.UNKNOWN).let { grade ->
             outside_dust2_state.text = grade.label
-
 
 
         }
