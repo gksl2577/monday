@@ -1,21 +1,21 @@
+
+#-*-coding:utf8-*-
+
 """
 * PMS7003 데이터 수신 프로그램
 * 수정 : 2018. 11. 19
 * 제작 : eleparts 부설연구소
 * SW ver. 1.0.2
-> 관련자료
-파이썬 라이브러리
-https://docs.python.org/3/library/struct.html
-점프 투 파이썬
-https://wikidocs.net/book/1
-PMS7003 datasheet
-http://eleparts.co.kr/data/_gextends/good-pdf/201803/good-pdf-4208690-1.pdf
 """
 
 import serial
 import struct
 import time
-
+from datetime import datetime
+from time import sleep
+import socket
+import sys
+import mh_z19
 
 class PMS7003(object):
 
@@ -141,18 +141,52 @@ class PMS7003(object):
         print ("CHKSUM : %s | read CHKSUM : %s | CHKSUM result : %s" % (chksum, data[self.CHECKSUM], chksum == data[self.CHECKSUM]))
         print ("============================================================================")
 
+    def save_data(self,buffer):
+
+        global dust_data
+
+        chksum = self.chksum_cal(buffer)
+        data = self.unpack_data(buffer)
+
+        print ("PM 1.0 : %s" % ( data[self.DUST_PM1_0_ATM]), flush = True)
+        print ("PM 2.5 : %s" % ( data[self.DUST_PM2_5_ATM]), flush = True)
+        print ("PM 10.0 : %s" % ( data[self.DUST_PM10_0_ATM]), flush = True)
+
+        dust_data = date_string + "," + str(data[self.DUST_PM1_0_ATM]) + "," + str(data[self.DUST_PM2_5_ATM]) + "," + str(data[self.DUST_PM10_0_ATM])+'\n'
+       # f.write(dust_data)
+        
+
 
 
 # UART / USB Serial : 'dmesg | grep ttyUSB'
 USB0 = '/dev/ttyUSB0'
-UART = '/dev/ttyAMA0'
-
+#UART = '/dev/ttyS0'
+UART = '/dev/ttyAMA1'
 # USE PORT
 SERIAL_PORT = UART
 
 # Baud Rate
 Speed = 9600
 
+# Host ip 
+HOST = "0.0.0.0"
+
+#Port
+PORT = 8888
+
+dust_data = ""
+
+#server setup
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+server_socket.bind(("", PORT))
+
+server_socket.listen(1)
+
+server_socket.setblocking(0)
+is_connected = 0
 
 # example
 if __name__=='__main__':
@@ -161,22 +195,53 @@ if __name__=='__main__':
     ser = serial.Serial(SERIAL_PORT, Speed, timeout = 1)
 
     dust = PMS7003()
-
-    while True:
-        
-        ser.flushInput()
-        buffer = ser.read(1024)
-
-        if(dust.protocol_chk(buffer)):
-        
-            print("DATA read success")
-        
-            # print data
-            dust.print_serial(buffer)
+    #f = open('fine_dust.csv','w', encoding = "UTF-8")
+    try:
+        while True:
+            #check time
+            now = datetime.now()
+            date_string = str(now.year) + "." + str(now.month) + "." + str(now.day) + " " + str(now.hour) + ":" + str(now.minute) + ":" + str(now.second)
             
-        else:
+            #read serial input
+            ser.flushInput()
+            buffer = ser.read(1024)
 
-            print("DATA read fail...")
+            if(dust.protocol_chk(buffer)):
+            
+                print("DATA read success", flush = True)
+            
+                #print data
+                #dust.print_serial(buffer)
+                dust.save_data(buffer)
+            else:
+
+                print("DATA read fail...", flush = True) 
+
+            #sys.stdout.flush()
+
+            #check connection 
+            if (is_connected == 0):
+                try:
+                    client_socket, addr = server_socket.accept()
+                    if client_socket:
+                        print('Connected by', addr)
+                        is_connected = 1
+                except:
+                    pass
 
 
-    ser.close()
+            #send data
+            if (is_connected == 1):
+                try:
+                    client_socket.sendall(dust_data.encode())
+                except:
+                    is_connected = 0
+                    print(addr," Disconnected")
+            
+        #f.close() # close file
+        client_socket.close()
+        server_socket.close()
+        ser.close()
+
+    except KeyboardInterrupt:
+        sys.exit()
