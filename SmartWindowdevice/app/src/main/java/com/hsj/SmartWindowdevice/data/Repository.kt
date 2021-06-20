@@ -67,7 +67,7 @@ object Repository {
             ?.response
             ?.body
             ?.items
-            ?.forecastValue!![3]
+            ?.forecastValue?.get(3)
 
     }
 

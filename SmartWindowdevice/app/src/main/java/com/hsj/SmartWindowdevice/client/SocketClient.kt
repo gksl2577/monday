@@ -1,10 +1,21 @@
 package com.hsj.SmartWindowdevice.client
 
-import android.app.ActivityManager
-import android.content.BroadcastReceiver
+import android.R
+import android.app.*
 import android.content.Intent
+import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.View
+import android.widget.ImageButton
+import android.widget.TextView
+import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import com.hsj.SmartWindowdevice.tcpThread
 import java.io.*
 import java.net.Socket
 
@@ -13,8 +24,8 @@ class SocketClient(var handler: Handler) : Thread(){
     var dataInputStream: InputStream? = null
     var dataOutputStream: OutputStream? = null
     private var socket: Socket? = null
-    var ip = "192.168.196.69"
-    private val port = 5555
+    var ip = "27.115.159.82"
+    private val port = 8888
     val TAG = "TAG+Thread"
     override fun run() {
         try {
@@ -83,14 +94,14 @@ class SocketClient(var handler: Handler) : Thread(){
     } // pdlc off
 
     @Throws(IOException::class)
-    fun measureMotorRotations() {
-        val inst = "measureMotorRotations".toByteArray()
+    fun measureMotorRotationsOn() {
+        val inst = "measureon".toByteArray()
         dataOutputStream!!.write(inst)
-    } // 모터 회전수 측정
+    } // 모터 회전수 측정 시작
 
     @Throws(IOException::class)
-    fun resetMotorRotations(){
-        val inst = "resetMotorRotations".toByteArray()
+    fun measureMotorRotationsOff(){
+        val inst = "measureoff".toByteArray()
         dataOutputStream!!.write(inst)
     } // 모터 회전수 측정값 삭제
 
@@ -111,8 +122,12 @@ class SocketClient(var handler: Handler) : Thread(){
         val inst = "windowclose".toByteArray()
         dataOutputStream!!.write(inst)
     }// 창문 닫기
+    @Throws(IOException::class)
+    fun stationName(stationName11:String){
+        val inst = "111,${stationName11}".toByteArray()
+        dataOutputStream!!.write(inst)
+    }// 창문 닫기
+
 } // Tcp 소켓통신을 담당하는 클래스
-
-
 
 

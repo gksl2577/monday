@@ -18,51 +18,12 @@ class WindowControlActivity : AppCompatActivity() {
             finish()
         }
 
-        resetBtn.setOnClickListener {
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("초기화")
-            builder.setMessage("모터 회전 수 정보를 삭제 하시겠습니까?")
-            builder.setPositiveButton(
-                "예"
-            ) { _: DialogInterface?, _: Int ->
+        measureStart.setOnClickListener {
+
                 Log.d("reset", "yes")
                 Thread {
                     try {
-                        (LoginActivity.context as LoginActivity).tcp?.resetMotorRotations()
-                        runOnUiThread {
-                            Toast.makeText(
-                                applicationContext,
-                                "모터 회전수를 초기화합니다.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                    }
-
-                }.start()
-
-            }
-            builder.setNegativeButton(
-                "아니오"
-            ) { _: DialogInterface?, _: Int ->
-                Log.d("reset", "no")
-
-            }
-            builder.show()
-        }
-
-        measurelengthBtn.setOnClickListener {
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("모터 회전수 측정")
-            builder.setMessage("모터 회전 수 정보를 수집 하시겠습니까?")
-            builder.setPositiveButton(
-                "예"
-            ) { _: DialogInterface?, _: Int ->
-                Log.d("measure", "yes")
-                Thread {
-                    try {
-                        (LoginActivity.context as LoginActivity).tcp?.measureMotorRotations()
+                        (LoginActivity.context as LoginActivity).tcp?.measureMotorRotationsOn()
                         runOnUiThread {
                             Toast.makeText(
                                 applicationContext,
@@ -75,15 +36,30 @@ class WindowControlActivity : AppCompatActivity() {
                     }
 
                 }.start()
-            }
-            builder.setNegativeButton(
-                "아니오"
-            ) { _: DialogInterface?, _: Int ->
-                Log.d("measure", "no")
 
-            }
-            builder.show()
+
         }
+
+        measureStop.setOnClickListener {
+
+            Log.d("measure", "yes")
+            Thread {
+                try {
+                    (LoginActivity.context as LoginActivity).tcp?.measureMotorRotationsOff()
+                    runOnUiThread {
+                        Toast.makeText(
+                            applicationContext,
+                            "모터 회전수 측정을 종료합니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+
+            }.start()
+        }
+
 
         close.setOnClickListener {
             Log.d("move", "close")

@@ -34,20 +34,20 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/resetBtn"
+            android:id="@+id/measureStart"
             android:layout_width="100dp"
             android:layout_height="70dp"
             android:layout_margin="10dp"
-            android:text="@string/reset"
+            android:text="@string/measurestart"
             android:textSize="15sp"
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/measurelengthBtn"
+            android:id="@+id/measureStop"
             android:layout_width="100dp"
             android:layout_height="70dp"
             android:layout_margin="10dp"
-            android:text="@string/measure_length"
+            android:text="@string/measurestop"
             android:textSize="15sp"
             android:textStyle="bold" />
 

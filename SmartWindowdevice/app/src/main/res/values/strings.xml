@@ -19,8 +19,8 @@
     <string name="weathernow_image">weather_image</string>
 
     <string name="backarrow_imgae">backarrow_image</string>
-    <string name="reset">초기화</string>
-    <string name="measure_length">창문 길이 측정</string>
+    <string name="measurestart">길이 측정 시작</string>
+    <string name="measurestop">길이 측정 종료</string>
     <string name="close">close</string>
     <string name="open">open</string>
     <string name="stop">stop</string>

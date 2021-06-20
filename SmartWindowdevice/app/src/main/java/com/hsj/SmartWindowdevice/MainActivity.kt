@@ -26,8 +26,10 @@ import com.hsj.SmartWindowdevice.data.models.monitortingstation.MonitoringStatio
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.IOException
+import kotlin.concurrent.thread
 
 
 class MainActivity : AppCompatActivity() {
@@ -46,11 +48,32 @@ class MainActivity : AppCompatActivity() {
 
 
         initVariables()
-        Log.d("data","${(LoginActivity.context as LoginActivity).sensordata}" )
-        inside_co2.setText((LoginActivity.context as LoginActivity).sensordata)
+        requestLocationPermission()
+        Log.d("data22", "${(LoginActivity.context as LoginActivity).pm25data}")
+        Log.d("data22", "${(LoginActivity.context as LoginActivity).pm10data}")
+        Log.d("data22", "${(LoginActivity.context as LoginActivity).co2data}")
+
+
         location_image.setOnClickListener {
-            requestLocationPermission()
+
+            Thread {
+                try {
+                    (LoginActivity.context as LoginActivity).tcp?.stationName(address.text.toString())
+                    Log.d("station11", "${address.text}")
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }.start()
+            Log.d("station", "${address.text}")
+
+
         }
+
+
+
+
+
+////
 
         // 창문 수동 모드 버튼
         manualmode.setOnClickListener {
@@ -80,8 +103,8 @@ class MainActivity : AppCompatActivity() {
 
                     }.start()
 
-                }else{
-                    Toast.makeText(applicationContext,"pdlc가 켜져 있습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(applicationContext, "pdlc가 켜져 있습니다.", Toast.LENGTH_SHORT).show()
                 }
 
             }
@@ -100,8 +123,8 @@ class MainActivity : AppCompatActivity() {
 
                     }.start()
 
-                }else{
-                    Toast.makeText(applicationContext,"pdlc가 꺼져 있습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(applicationContext, "pdlc가 꺼져 있습니다.", Toast.LENGTH_SHORT).show()
                 }
 
             }
@@ -135,8 +158,9 @@ class MainActivity : AppCompatActivity() {
 
                     }.start()
 
-                }else{
-                    Toast.makeText(applicationContext,"창문 자동 모드가 켜져 있습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(applicationContext, "창문 자동 모드가 켜져 있습니다.", Toast.LENGTH_SHORT)
+                        .show()
                 }
 
                 Log.d("automode", "on")
@@ -162,8 +186,9 @@ class MainActivity : AppCompatActivity() {
 
                     }.start()
 
-                }else{
-                    Toast.makeText(applicationContext,"창문 자동 모드가 꺼져 있습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(applicationContext, "창문 자동 모드가 꺼져 있습니다.", Toast.LENGTH_SHORT)
+                        .show()
                 }
                 Log.d("automode", "off")
 
@@ -226,21 +251,67 @@ class MainActivity : AppCompatActivity() {
                 val dustValue = Repository.getAirDustData(monitoringStation!!.stationName!!)
                 val forecastValue = Repository.getVillageForecastData(
                     dateNow(),
-                    timeNow(), 61.0, location.longitude
+                    timeNow(), 62.1, location.longitude
                 )
+
                 Log.d("api", "${monitoringStation?.stationName}")
                 address.setText(monitoringStation?.stationName)
+
                 Log.d("api", "${timeNow()}")
                 Log.d("api", "${forecastValue}")
-                temperature.setText("${forecastValue?.obsrValue}" + "℃")
+                if(forecastValue?.obsrValue != null)
+                {
+                    temperature.setText("${forecastValue?.obsrValue}" + "℃")
+
+                }else{
+                    temperature.setText("예보중")
+                }
+
 
                 displayAirDustData(monitoringStation, dustValue!!)
+
+                inside_co2.setText("${(LoginActivity.context as LoginActivity).sensordata[2]}" + "ppm")
+                fineDustDisplay((LoginActivity.context as LoginActivity).sensordata[1].toInt())
+                ultraFineDustDisplay((LoginActivity.context as LoginActivity).sensordata[0].toInt())
+
 
             }
 
 
         }
 
+    }
+
+    fun fineDustDisplay(sensordata: Int) {
+        if (sensordata >= 0 && sensordata <= 30) {
+            inside_dust1_state.setText("좋음")
+            inside_dust1_value.setText("${sensordata}" + "㎍/")
+        } else if (sensordata >= 31 && sensordata <= 80) {
+            inside_dust1_state.setText("보통")
+            inside_dust1_value.setText("${sensordata}" + "㎍/")
+        } else if (sensordata >= 81 && sensordata <= 150) {
+            inside_dust1_state.setText("나쁨")
+            inside_dust1_value.setText("${sensordata}" + "㎍/")
+        } else if (sensordata >= 151) {
+            inside_dust1_state.setText("매우나쁨")
+            inside_dust1_value.setText("${sensordata}" + "㎍/")
+        }
+    }
+
+    fun ultraFineDustDisplay(sensordata: Int) {
+        if (sensordata >= 0 && sensordata <= 15) {
+            inside_dust2_state.setText("좋음")
+            inside_dust2_value.setText("${sensordata}" + "㎍/")
+        } else if (sensordata >= 16 && sensordata <= 35) {
+            inside_dust2_state.setText("보통")
+            inside_dust2_value.setText("${sensordata}" + "㎍/")
+        } else if (sensordata >= 36 && sensordata <= 75) {
+            inside_dust2_state.setText("나쁨")
+            inside_dust2_value.setText("${sensordata}" + "㎍/")
+        } else if (sensordata >= 76) {
+            inside_dust2_state.setText("매우나쁨")
+            inside_dust2_value.setText("${sensordata}" + "㎍/")
+        }
     }
 
     fun displayAirDustData(moniteringStation: MonitoringStation, dustValue: DustValue) {
