@@ -1,0 +1,28 @@
+<resources>
+
+
+    <string name="app_name">Smart Window device</string>
+    <string name="window_image">window_image</string>
+    <string name="edittext_hint">비밀번호를 입력하세요.</string>
+    <string name="connectBtn">연결하기</string>
+
+    <string name="window_auto_mode">창문 자동 모드</string>
+    <string name="window_manual_mode">창문 수동 모드</string>
+    <string name="inside">Inside</string>
+    <string name="outside">Outside</string>
+    <string name="pdlc_onoff">PDLC ON/OFF</string>
+    <string name="weather_image">weather_image</string>
+    <string name="dust_image">dust_image</string>
+    <string name="co2_image">co2_image</string>
+    <string name="pdlc_image">pdlc_image</string>
+    <string name="location_image">location_image</string>
+    <string name="weathernow_image">weather_image</string>
+
+    <string name="backarrow_imgae">backarrow_image</string>
+    <string name="measurestart">길이 측정 시작</string>
+    <string name="measurestop">길이 측정 종료</string>
+    <string name="close">close</string>
+    <string name="open">open</string>
+    <string name="stop">stop</string>
+
+</resources>
