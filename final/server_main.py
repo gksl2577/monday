@@ -17,7 +17,6 @@ from urllib.parse import urlencode, unquote, quote_plus, quote
 import urllib
 import xml.etree.ElementTree as elemTree
 
-#print (sys.path)
 
 recv_data = ''
 dust_data = ""
@@ -45,22 +44,6 @@ dust_pm10_mean_list = []
 
 max_samples = 10 #calculating average for 10 secs
 
-#pm10 fine dust standards
-moderate = 31
-bad = 81
-very_bad = 151
-
-#pm25 fine dust standards
-moderate_pm25 = 16
-bad_pm25 = 36
-very_bad_pm25 = 76
-
-
-#commands
-do_open = '1'
-do_close = '2'
-do_close = '3'
-must_open = '4'
 
 window_pm10_open = 0
 window_pm25_open = 0
@@ -69,13 +52,11 @@ window_manual_open = 0
 
 is_automode = 0
 
-#################
-debugflag = 0
-
-
-# UART / USB Serial : 'dmesg | grep ttyUSB'
-USB0 = '/dev/ttyUSB0'
-#UART = '/dev/ttyS0'
+motor_measure_flag = 0
+measure_data = open("measure_motor.txt",'r').readline()
+if measure_data != '':
+    motor_measure_time = measure_data
+# UART
 UART = '/dev/ttyAMA1'
 
 # USE PORT
@@ -102,7 +83,7 @@ server_socket.listen(1)
 server_socket.setblocking(0)
 is_connected = 0
 
-data_issended = 0
+
 #bluetooth server setup
 bt_socket = BluetoothSocket(RFCOMM)
 bt_connected = 0
@@ -111,7 +92,7 @@ bt_connected = 0
 url = "http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty"
 
 
-station_location = "홍릉로"
+station_location = "홍릉로" #defualt location
 station_name = quote(station_location)
 
 queryParams = '?' + urlencode({ quote_plus('servicekey') : 'XndVTn3yY4Rt8uzteBr%2FfcbYDAq9LiyBJPqIth%2F5oRKh6X23URynAib7Cqj03SWYjejetd5T940tylw%2BFGjAgg%3D%3D',
@@ -123,7 +104,7 @@ api_requested_time = 0
 
 
 
-class PMS7003(object):
+class PMS7003(object): #fine dust sensor class
 
     # PMS7003 protocol data (HEADER 2byte + 30byte)
     PMS_7003_PROTOCOL_SIZE = 32
@@ -259,8 +240,6 @@ class PMS7003(object):
         pm25_data = data[self.DUST_PM2_5_ATM]
         pm10_data = data[self.DUST_PM10_0_ATM]
 
-       # f.write(dust_data)
-   
 
 def automode(bt_socket):
     global is_automode
@@ -283,44 +262,36 @@ def automodeoff(bt_socket):
     is_automode = 0
     
 
-def sensordata():
-    print ("return sensor data")
-    pass
 def pdlc_on(bt_socket):
     try:
         bt_socket.send('5\n')
         print ("make pdlc on")
     except:
         print('bluetooth send fail')
-    #print ("make pdlc on")
     pass
 
 def pdlc_off(bt_socket):
     try:
         bt_socket.send('6\n')
-        #print ("make pdlc on")
+        print ("make pdlc off")
     except:
         print('bluetooth send fail')
-    print ("make pdlc off")
     pass
+
 def open_window(bt_socket):
-   # global window_manual_open
     try:
         bt_socket.send('3\n')
-    #    window_manual_open = 1
         print ("opening window")
     except:
         print('bluetooth send fail')
     
     pass
 def close_window(bt_socket):
-    #global window_manual_open
     try:
         bt_socket.send('4\n')
-     #   window_manual_open = 0
+        print ("close window")
     except:
         print('send fail')
-    print ("close window")
     pass
 
 def open_window_manual(bt_socket):
@@ -343,9 +314,9 @@ def close_window_manual(bt_socket):
         window_pm10_open = 0
         window_pm25_open = 0
         window_co2_open = 0
+        print ("close window")
     except:
         print('send fail')
-    print ("close window")
     pass
 
 def stop(bt_socket):
@@ -354,9 +325,7 @@ def stop(bt_socket):
         print('stop window')        
     except:
         print('send fail')
-    pass
-    
-    pass
+
 def measure_motor_rotation(bt_socket):
     global motor_measure_time, motor_measure_flag
     try:
@@ -373,15 +342,17 @@ def measure_motor_rotation_off(bt_socket):
         motor_measure_time = time.time() - motor_measure_time
         bt_socket.send('9\n')
         print('stopping window measuring')
-
+        #save measured data to txt file
         measure_file = open("measure_motor.txt",'w')
         measure_file.write(str(motor_measure_time))
         print(motor_measure_time, "motor_measure_time")
         measure_file.close()
         motor_measure_flag = 1        
+
     except Exception as e:
         print(e)
         print('motor measure stop fail')
+
 def check_already_open():
     global window_pm10_open,window_pm25_open,window_co2_open
     print ("debug:=============",window_co2_open,window_pm10_open,window_pm25_open)
@@ -397,8 +368,6 @@ def mean(nums):
 
 
 
-
-
 if __name__ == '__main__':
 
     ser = serial.Serial(SERIAL_PORT, Speed, timeout = 1)
@@ -408,21 +377,16 @@ if __name__ == '__main__':
     try:
 
         while(1):
-            #check time
-            now = datetime.now()
-            date_string = str(now.year) + "." + str(now.month) + "." + str(now.day) + " " + str(now.hour) + ":" + str(now.minute) + ":" + str(now.second)
 
              #read serial input
             ser.flushInput()
             buffer = ser.read(1024)
             print("================================")
+
             #===========fine dust sensor=====
             if(dust.protocol_chk(buffer)):
             
                 print("fine dust read success", flush = True)
-            
-                #print data
-                #dust.print_serial(buffer)
                 dust.save_data(buffer)
                 dust_read_succeed = 1
                 dust_fail_count=  0
@@ -434,6 +398,7 @@ if __name__ == '__main__':
                 dust_read_succeed = 0
                 dust_fail_count += 1
                 print("finedust read fail", flush = True) 
+
             #==============co2 sensor=====
             try:
                 co2_data = mh_z19.read()['co2']
@@ -459,7 +424,6 @@ if __name__ == '__main__':
                 dust_pm25_mean_list.pop(0)
             
 
-
             pm10_datas.append(pm10_data)
             dust_pm10_mean = round(mean(pm10_datas))
             dust_pm10_mean_list.append(dust_pm10_mean)
@@ -484,8 +448,7 @@ if __name__ == '__main__':
             
             #merge sensor datas 
 
-            dust_data = date_string + "," + str(dust_pm25_mean) + "," + str(dust_pm10_mean)
-
+            dust_data = str(dust_pm25_mean) + "," + str(dust_pm10_mean)
             data_send = dust_data + ","+str(co2_mean)+'\n'
 
 
@@ -511,7 +474,6 @@ if __name__ == '__main__':
                     tree = elemTree.fromstring(xmlStr)
                     pm10value_outer = int(tree.find('./body/items/item/pm10Value').text)
                     pm25value_outer = int(tree.find('./body/items/item/pm25Value').text)
- 
                     
                     print("api newly requested")
 
@@ -520,8 +482,8 @@ if __name__ == '__main__':
                 except:
                     print("parsing fail")
 
-            print("Outer pm 10 value: ", pm10value_outer)
             print("Outer pm 2.5 value: ",pm25value_outer)
+            print("Outer pm 10 value: ", pm10value_outer)
 
             #check connection 
             if (is_connected == 0):
@@ -529,27 +491,16 @@ if __name__ == '__main__':
                     client_socket,addr = server_socket.accept()
                     if client_socket:
                         client_socket.setblocking(0)
-                        print ('----------------connected by', addr,'--------------')
-                        is_connected = 1
-                    try:
-                        pass
-                        #client_socket.sendall("test message")
-                    except:
-                        print ("send fail")
-                        
+                        print ('----------------connected by', addr,'-----------------')
+                        is_connected = 1                     
                 except:
                     pass
 
 
             #send merged data
             if (is_connected == 1):
-                #if data_issended != 1:
                 try:
-                    dust_first_send = str(dust_pm25_mean)+","+str(dust_pm10_mean)+','+str(co2_mean)+'\n'
-                    client_socket.sendall(dust_first_send.encode())
-                    data_issended = 1
-                    #receive commands from app
-                    #print(recv_data)
+                    client_socket.sendall(data_send.encode())
                 except:
                     is_connected = 0
                     print(addr," Disconnected")
@@ -570,14 +521,9 @@ if __name__ == '__main__':
                 except:
                     print("bluetooth connect fail")
                     
-            #else: #if bluetooth connected
-                #try:
-                 #   bt_socket.send('2')
-                #except:
-                  #  print('bluetooth send fail')
             
             if recv_data != '':
-                #print ('Received Data : ' + str(recv_data))
+
                 command = recv_data
                 print('==========',command,'===========')
                 check_command = command.find("111") #station name check
@@ -627,6 +573,14 @@ if __name__ == '__main__':
                     elif command == "measureoff":
                         print('please turn off auto mode!')                        
                         #measure_motor_rotation()
+
+            if motor_measure_flag ==1: #if measured data exists
+                try:
+                    bt_socket.send(str(motor_measure_time*2363)+'\n') #2363 is motor calculated ratio
+                    motor_measure_flag = 0
+                except:
+                    print('bluetooth send fail')
+
                 
      
             
@@ -674,12 +628,11 @@ if __name__ == '__main__':
 
                 if co2_mean >= co2_threshold:
                     open_window(bt_socket)
-                    #do x % opening
                     window_co2_open = 1
                 
                 if window_pm10_open:
                     if abs((dust_pm10_mean_list[-1] - dust_pm10_mean_list[0])) < 10 :
-                        #close_window(bt_socket)
+
                         window_pm10_open = 0
                         if (window_co2_open == 0 and window_pm10_open == 0 and window_pm25_open == 0):
                     
@@ -687,7 +640,7 @@ if __name__ == '__main__':
 
                 if window_pm25_open:
                     if abs((dust_pm25_mean_list[-1] - dust_pm25_mean_list[0])) < 10 :
-                        #close_window(bt_socket)
+  
                         window_pm25_open = 0
                         if (window_co2_open == 0 and window_pm10_open == 0 and window_pm25_open == 0):
                     
@@ -695,7 +648,7 @@ if __name__ == '__main__':
 
                 if window_co2_open:
                     if abs((co2_mean_list[-1] - co2_mean_list[0])) < 10 :
-                        #close_window(bt_socket)
+   
                         window_co2_open = 0
                         if (window_co2_open == 0 and window_pm10_open == 0 and window_pm25_open == 0):
                     
@@ -703,21 +656,6 @@ if __name__ == '__main__':
 
                 
 
-#for debugging
-            try:
-                if debugflag ==0:
-                    #bt_socket.send('13500\n')
-                    debugflag = 1
-                #automode(bt_socket)
-                #bt_socket.send('')
-
-            except:
-                print('debug send fail')
-                
-            else:#manual mode
-                pass
-
-        #print 'teset'
         client_socket.close()
         server_socket.close()
         bt_socket.close()
